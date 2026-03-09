@@ -17,6 +17,7 @@
 */
 
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
+import { FormSwitch } from "@components/FormSwitch";
 import { Margins } from "@components/margins";
 import { Paragraph } from "@components/Paragraph";
 import { classes } from "@utils/misc";
@@ -43,6 +44,18 @@ export const TranslateIcon: IconComponent = ({ height = 20, width = 20, classNam
 
 export let setShouldShowTranslateEnabledTooltip: undefined | ((show: boolean) => void);
 
+function ShowAutoTranslateToggle() {
+    const value = settings.use(["showAutoTranslateAlert"]).showAutoTranslateAlert;
+    return (
+        <FormSwitch
+            title="Don't show again"
+            value={!value}
+            onChange={v => settings.store.showAutoTranslateAlert = !v}
+            hideBorder
+        />
+    );
+}
+
 export const TranslateChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
     const { autoTranslate } = settings.use(["autoTranslate"]);
 
@@ -57,23 +70,22 @@ export const TranslateChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
     const toggle = () => {
         const newState = !autoTranslate;
         settings.store.autoTranslate = newState;
-        if (newState && settings.store.showAutoTranslateAlert !== false)
+        if (newState && settings.store.showAutoTranslateAlert !== false) {
             Alerts.show({
                 title: "Vencord Auto-Translate Enabled",
                 body: <>
                     <Paragraph className={Margins.bottom16}>
                         You just enabled Auto Translate! Any message <b>will automatically be translated</b> before being sent.
                     </Paragraph>
-
+                    <ShowAutoTranslateToggle />
                 </>,
                 confirmText: "Disable Auto-Translate",
                 cancelText: "Got it",
-                secondaryConfirmText: "Don't show again",
-                onConfirmSecondary: () => settings.store.showAutoTranslateAlert = false,
                 onConfirm: () => settings.store.autoTranslate = false,
                 // troll
                 confirmColor: "vc-notification-log-danger-btn",
             });
+        }
     };
 
     const button = (
